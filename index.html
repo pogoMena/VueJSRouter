@@ -1,0 +1,137 @@
+<html>
+<head>
+  <title>Social Media Disaster Monitoring Application</title>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/vuex@4"></script>
+  <script src="https://unpkg.com/vue-router@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-3-socket.io@1.0.5/dist/vue-socketio.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {font-size: 24px;}
+    a {padding: 10px;}
+    td,tr,th,table {
+      border: 2px solid black;
+      padding: 20px;
+      font-size: 32px;
+    }
+    table {border-collapse: collapse;}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="flex">
+      <div class="w-3/12 border-r border-black p-4 text-base">
+        <router-link to="/" class="block">Home</router-link>
+        <router-link to="/feed" class="block">Live Feed</router-link>
+        <router-link to="/analytics" class="block">Analytics</router-link>
+      </div>
+      <div class="w-9/12 p-4 text-base">
+        <router-view></router-view>
+      </div>
+    </div>
+  </div>
+<script>
+  const HomeView = {
+    template: `
+      <div>
+        <p class="pb-4">sfsdgsgregerg</p>
+        <p>dfgdsfgsrgre</p>
+      </div>
+    `
+  }
+
+
+  const LiveFeedView = {
+    template: `
+    <div v-for="message in feed">
+      <div class="border border-gray-400 rounded-xl p-4 mb-2">
+        <div class="flex text-base gap-4 w-full">
+          <div class="w-6/12 text-xl">{{ message.name }}</div>
+          <div class="">
+            <div>{{ message.problem }}</div>
+            <div class="text-xs"> {{message.priority}} </div>
+          </div>
+        </div>
+        <div class="flex text-base gap-4 mt-4 w-full">
+          <div class="w-8/12"> </div>
+          <div class="w-4/12 h-24 rounded-lg" :style="{background: 'url(' + message.image + ')', backgroundSize: 'cover' }"></div>
+        </div>
+      </div>
+    </div>
+    `
+    ,
+    data() {
+      return {
+        incomingMessages: [],
+      }
+    },
+    computed: {
+      feed() {
+        return this.incomingMessages.reverse()
+      }
+    },
+    sockets: {
+      connect: function() {
+        console.log('socket connected')
+      }
+    },
+    created() {
+      this.sockets.subscribe('post', (data) => {
+        this.incomingMessages.push(data)
+      });
+    },
+    destroyed() {
+      this.sockets.unsubscribe('post')
+    }
+  }
+  const AnalyticsView = {
+    template: 'Analytics!'
+  }
+
+  const routes = [
+    {path: '/', component: HomeView },
+    {path: '/feed', component: LiveFeedView },
+    {path: '/analytics', component: AnalyticsView },
+  ]
+
+  const router = VueRouter.createRouter({
+    history: VueRouter.createWebHashHistory(),
+    routes,
+  });
+
+  const socket = new VueSocketIO({
+    debug: true,
+    connection: 'http://localhost:3000',
+  })
+
+  const app = Vue.createApp({});
+  app.use(router);
+  app.use(socket);
+  app.mount('#app');
+
+</script>
+
+<style>
+  .router-link-active{
+    background: #d4d4d4;
+    border-radius: 10px;
+  }
+</style>
+
+<script>
+  /*
+  // put the raw data onto the DOM and log it to the console
+
+
+    socket.on('post', data => {
+
+    document.getElementById("app").innerHTML +=
+      JSON.stringify(data) + "<br /> <br /> <br /> <br />";
+
+    console.log(data);
+  });
+  */
+</script>
+</body>
+</html>
